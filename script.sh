@@ -25,12 +25,14 @@ GREEN="\033[0;32m"
 CYAN="\033[0;36m"
 ORANGE="\033[0;33m"
 NONE="\033[0m"
-CONT="Continuing installtion in"
+
+CONT="Continuing installation in"
 INST="Installing now"
-WARN="This needs further configuration. Check the tutorial Readme."
+WARN="This needs further configuration. Check the tutorial README."
 RUN=" is now running."
 STOP=" is now stopped."
 NOP=" is not installed."
+
 me=$USER
 
 update() {
@@ -108,6 +110,8 @@ case $1 in
             12 "MongoDB" off
             13 "Redis" off
             14 "Neo4j" off
+            15 "Miktex" off
+            # 16 "uv (multiple versions of python)" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -202,6 +206,18 @@ case $1 in
                     sudo apt-get install neo4j-enterprise -y
                     success "Neo4j installed successfully!"
                     ;;
+                # miktex
+                15)
+                    update && timer "$CONT" "$INST Miktex"
+                    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D6BC243565B2087BC3F897C9277A7293F59E4889
+                    echo "deb http://miktex.org/download/ubuntu bionic universe" | sudo tee /etc/apt/sources.list.d/miktex.list
+                    sudo apt-get install miktex
+                    success "Miktex installed successfully!"
+                    ;;
+                # uv (https://github.com/astral-sh/uv) 
+                # 16)
+                #     success "uv installed successfully!"
+                #     ;;
             esac
         done
         success "Installation finished successfully!"

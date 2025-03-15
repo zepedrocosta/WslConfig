@@ -211,6 +211,7 @@ case $1 in
                     update && timer "$CONT" "$INST TeX Live"
                     sudo apt install texlive
                     success "TeX Live installed successfully!"
+                    info "Run 'system latex-deps' to install LaTeX dependencies"
                     ;;
                 # uv (https://github.com/astral-sh/uv) 
                 # 16)
@@ -287,31 +288,29 @@ case $1 in
         if missing "dialog"; then 
             info "Installing Dialog" && sudo -i apt install dialog > /dev/null 2>&1
         fi
-        cmd=(dialog --separate-output --radiolist "Please select which LaTeX package you want to install" 22 76 16)
+        cmd=(dialog --radiolist "Please select which LaTeX package you want to install" 22 76 16)
         options=(
-            1 "Base version (~216MB)" off
-            2 "Extra version (~452MB)" off
-            3 "Full version (~5358MB)" off
+            1 "Base version (~216MB)" OFF
+            2 "Extra version (~452MB)" OFF
+            3 "Full version (~5358MB)" OFF
         )
-        choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-        for choice in $choices
-        do
-            case "${choice}" in
-                1)
-                    clear && timer "$CONT" "$INST Base version"
-                    apt-get install texlive-base
-                    ;;
-                2)
-                    clear && timer "$CONT" "$INST Extra version"
-                    sudo apt-get install texlive-latex-extra
-                    ;;
-                3)
-                    clear && timer "$CONT" "$INST Full version"
-                    sudo apt-get install texlive-full
-                    ;;
-            esac
-        done
+        choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+        case "$choice" in
+            1)
+                clear && timer "$CONT" "$INST Base version"
+                sudo apt-get install texlive-base
+                ;;
+            2)
+                clear && timer "$CONT" "$INST Extra version"
+                sudo apt-get install texlive-latex-extra
+                ;;
+            3)
+                clear && timer "$CONT" "$INST Full version"
+                sudo apt-get install texlive-full
+                ;;
+        esac
         success "LaTeX dependencies installed successfully!"
+        ;;
     *)
         echo "error"
 esac

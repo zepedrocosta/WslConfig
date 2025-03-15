@@ -110,7 +110,7 @@ case $1 in
             12 "MongoDB" off
             13 "Redis" off
             14 "Neo4j" off
-            15 "Miktex" off
+            15 "TeX Live" off
             # 16 "uv (multiple versions of python)" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
@@ -206,13 +206,11 @@ case $1 in
                     sudo apt-get install neo4j-enterprise -y
                     success "Neo4j installed successfully!"
                     ;;
-                # miktex
+                # TeX Live
                 15)
-                    update && timer "$CONT" "$INST Miktex"
-                    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D6BC243565B2087BC3F897C9277A7293F59E4889
-                    echo "deb http://miktex.org/download/ubuntu bionic universe" | sudo tee /etc/apt/sources.list.d/miktex.list
-                    sudo apt-get install miktex
-                    success "Miktex installed successfully!"
+                    update && timer "$CONT" "$INST TeX Live"
+                    sudo apt install texlive
+                    success "TeX Live installed successfully!"
                     ;;
                 # uv (https://github.com/astral-sh/uv) 
                 # 16)
@@ -283,6 +281,37 @@ case $1 in
         npm i react-icons --save
         npm i recharts
         ;;
+    # https://tex.stackexchange.com/questions/245982/differences-between-texlive-packages-in-linux
+    latex-deps)
+        update
+        if missing "dialog"; then 
+            info "Installing Dialog" && sudo -i apt install dialog > /dev/null 2>&1
+        fi
+        cmd=(dialog --separate-output --radiolist "Please select which LaTeX package you want to install" 22 76 16)
+        options=(
+            1 "Base version (~216MB)" off
+            2 "Extra version (~452MB)" off
+            3 "Full version (~5358MB)" off
+        )
+        choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+        for choice in $choices
+        do
+            case "${choice}" in
+                1)
+                    clear && timer "$CONT" "$INST Base version"
+                    apt-get install texlive-base
+                    ;;
+                2)
+                    clear && timer "$CONT" "$INST Extra version"
+                    sudo apt-get install texlive-latex-extra
+                    ;;
+                3)
+                    clear && timer "$CONT" "$INST Full version"
+                    sudo apt-get install texlive-full
+                    ;;
+            esac
+        done
+        success "LaTeX dependencies installed successfully!"
     *)
         echo "error"
 esac

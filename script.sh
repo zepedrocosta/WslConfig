@@ -102,7 +102,7 @@ case $1 in
             4 "Node Version Manager (nvm)" off
             5 "Gcc" off
             6 "Makefile" off
-            7 "Anaconda" off
+            7 "uv (multiple versions of python)" off
             8 "Mysql" off
             9 "PostgresSQL" off
             10 "SQLite" off
@@ -111,7 +111,6 @@ case $1 in
             13 "Redis" off
             14 "Neo4j" off
             15 "TeX Live" off
-            # 16 "uv (multiple versions of python)" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -152,11 +151,9 @@ case $1 in
                     success "Make installed successfully!"
                     ;;
                 7)
-                    update && timer "$CONT" "$INST Anaconda"
-                    wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
-                    bash Miniconda3-py39_4.12.0-Linux-x86_64.sh
-                    rm Miniconda3-py39_4.12.0-Linux-x86_64.sh
-                    success "Anaconda installed successfully!"
+                    # uv (https://github.com/astral-sh/uv) 
+                    update && timer "$CONT" "$INST uv"
+                    success "uv installed successfully!"
                     ;;
                 8)
                     update && timer "$CONT" "$INST MySQL"
@@ -213,10 +210,6 @@ case $1 in
                     success "TeX Live installed successfully!"
                     info "Run 'system latex-deps' to install LaTeX dependencies"
                     ;;
-                # uv (https://github.com/astral-sh/uv) 
-                # 16)
-                #     success "uv installed successfully!"
-                #     ;;
             esac
         done
         success "Installation finished successfully!"

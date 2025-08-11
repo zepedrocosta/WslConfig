@@ -43,7 +43,7 @@ timer "Maven installed successfully!"
 
 timer "Installing Node Version Manager (NVM)"
 sudo apt-get install curl
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 timer "Node Version Manager (NVM) installed successfully!"
 
 timer "Installing GCC in"

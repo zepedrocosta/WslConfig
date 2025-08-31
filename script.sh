@@ -2,6 +2,7 @@
 
 : '
 	@Author: Gonçalo Condeço - https://github.com/GoncaloAC
+	@Author: José Costa      - https://github.com/zepedrocosta
 
 	Credits - As I wrote this file, some installers were taken from tutorials.
 
@@ -37,9 +38,10 @@ me=$USER
 
 update() {
     info "Updating Ubuntu..."
-    sudo -i apt-get update > /dev/null 2>&1
-    sudo apt-get upgrade -y > /dev/null 2>&1
-    success "Ubuntu Updated Successfully!" & sleep 2
+    sudo -i apt-get update >/dev/null 2>&1
+    sudo apt-get upgrade -y >/dev/null 2>&1
+    success "Ubuntu Updated Successfully!" &
+    sleep 2
 }
 
 success() {
@@ -72,7 +74,7 @@ timer() {
 }
 
 missing() {
-    dpkg -s $1 &> /dev/null
+    dpkg -s $1 &>/dev/null
     if [ $? -eq 0 ]; then
         return 1
     else
@@ -81,10 +83,10 @@ missing() {
 }
 
 run() {
-    if missing "$1"; then 
+    if missing "$1"; then
         error "$2$3"
     else
-        $5 > /dev/null 2>&1 && info "$2$4"
+        $5 >/dev/null 2>&1 && info "$2$4"
     fi
 }
 
@@ -92,7 +94,7 @@ case $1 in
     install)
         update
         if missing "dialog"; then
-            info "Installing Dialog" && sudo -i apt install dialog > /dev/null 2>&1
+            info "Installing Dialog" && sudo -i apt install dialog >/dev/null 2>&1
         fi
         cmd=(dialog --separate-output --checklist "Please Select Software you want to install:" 22 76 16)
         options=(
@@ -114,16 +116,15 @@ case $1 in
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
-        for choice in $choices
-        do
+        for choice in $choices; do
             case "${choice}" in
                 1)
                     update && timer "$CONT" "$INST Java 17"
                     sudo apt-get install openjdk-17-jdk -y
-                    echo >> ~/.bashrc
-                    echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
+                    echo >>~/.bashrc
+                    echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >>~/.bashrc
                     success "Java 17 installed successfully!"
-			        ;;
+                    ;;
                 2)
                     update && timer "$CONT" "$INST Java 17 sources"
                     sudo apt-get install openjdk-17-source -y
@@ -140,7 +141,7 @@ case $1 in
                     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
-                5) 
+                5)
                     update && timer "$CONT" "$INST Gcc"
                     sudo apt install gcc -y
                     success "Gcc installed successfully!"
@@ -151,7 +152,7 @@ case $1 in
                     success "Make installed successfully!"
                     ;;
                 7)
-                    # uv (https://github.com/astral-sh/uv) 
+                    # uv (https://github.com/astral-sh/uv)
                     update && timer "$CONT" "$INST uv"
                     success "uv installed successfully!"
                     ;;
@@ -160,7 +161,7 @@ case $1 in
                     sudo apt install mysql-server -y
                     warn "$WARN" && success "MySQL installed successfully!"
                     ;;
-		        9)
+                9)
                     update && timer "$CONT" "$INST PostgresSQL"
                     sudo apt install postgresql postgresql-contrib -y
                     warn "$WARN" && success "PostgresSQL installed successfully!"
@@ -170,7 +171,7 @@ case $1 in
                     sudo apt install sqlite3
                     success "SQLite installed successfully!"
                     ;;
-		        11)
+                11)
                     update && timer "$CONT" "$INST Apache Cassandra"
                     sudo apt install openjdk-8-jre
                     sudo apt install apt-transport-https gnupg2 -y
@@ -178,7 +179,7 @@ case $1 in
                     sudo sh -c 'echo "deb http://www.apache.org/dist/cassandra/debian 311x main" > /etc/apt/sources.list.d/cassandra.list'
                     sudo apt update
                     sudo apt install cassandra -y
-                    echo 'JAVA_HOME=usr/lib/jvm/java-8-openjdk-amd64' >> ~/usr/share/cassandra/cassandra.in.sh
+                    echo 'JAVA_HOME=usr/lib/jvm/java-8-openjdk-amd64' >>~/usr/share/cassandra/cassandra.in.sh
                     success "Apache Cassandra installed successfully!"
                     ;;
                 12)
@@ -190,12 +191,12 @@ case $1 in
                     sudo chmod +x /etc/init.d/mongodb
                     success "MongoDB installed successfully!"
                     ;;
-                13) 
+                13)
                     update && timer "$CONT" "$INST Redis"
                     sudo apt install redis-server -y
                     success "Redis installed successfully!"
                     ;;
-		        14)
+                14)
                     update && timer "$CONT" "$INST Neo4j"
                     wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
                     echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
@@ -214,10 +215,10 @@ case $1 in
         done
         success "Installation finished successfully!"
         ;;
-    config) 
+    config)
         update
-        if missing "dialog"; then 
-            info "Installing Dialog" && sudo -i apt install dialog > /dev/null 2>&1
+        if missing "dialog"; then
+            info "Installing Dialog" && sudo -i apt install dialog >/dev/null 2>&1
         fi
         cmd=(dialog --separate-output --checklist "Please Select Software you want to configure:" 22 76 16)
         options=(
@@ -226,8 +227,7 @@ case $1 in
             3 "Configure PostgresSQL for WSL" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
-        for choice in $choices
-        do
+        for choice in $choices; do
             case "${choice}" in
                 1)
                     clear && timer "$CONT" "$INST NPM"
@@ -278,8 +278,12 @@ case $1 in
     # https://tex.stackexchange.com/questions/245982/differences-between-texlive-packages-in-linux
     latex-deps)
         update
-        if missing "dialog"; then 
-            info "Installing Dialog" && sudo -i apt install dialog > /dev/null 2>&1
+        if missing "texlive-base"; then
+            error "TeX Live is not installed. Please install TeX Live first."
+            exit 1
+        fi
+        if missing "dialog"; then
+            info "Installing Dialog" && sudo -i apt install dialog >/dev/null 2>&1
         fi
         cmd=(dialog --radiolist "Please select which LaTeX package you want to install" 22 76 16)
         options=(
@@ -306,4 +310,5 @@ case $1 in
         ;;
     *)
         echo "error"
+        ;;
 esac

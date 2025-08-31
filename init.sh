@@ -1,44 +1,79 @@
 #!/bin/bash
 
 : '
-	@Author: José Costa      - https://github.com/zepedrocosta
+    @Author: José Costa      - https://github.com/zepedrocosta
 '
+
+set -euo pipefail
+IFS=$'\n\t'
 
 GREEN="\033[0;32m"
 CYAN="\033[0;36m"
 ORANGE="\033[0;33m"
+RED="\033[0;31m"
 NONE="\033[0m"
 
-me=$USER
+log() { echo -e "[$(date '+%H:%M:%S')] $1"; }
+success() { log "${GREEN}$1${NONE}"; }
+warn() { log "${ORANGE}$1${NONE}"; }
+error() {
+    log "${RED}Error:${NONE} $1" >&2
+    exit 1
+}
 
 timer() {
-    secs=4
+    local message="$1"
+    local done_msg="${2:-Done!}"
+    local secs=3
     while [ $secs -gt 0 ]; do
-        echo -ne "${CYAN}$1 ${ORANGE}$secs\033[O\r${NONE}" && sleep 1
+        echo -ne "${CYAN}$message ${ORANGE}$secs\r${NONE}"
+        sleep 1
         ((secs--))
     done
-    echo -e "${CYAN}$1 ${ORANGE}0\033[0K\r${NONE}" && echo -e "${GREEN}$2${NONE}"
+    echo -e "${CYAN}$message ${ORANGE}0\r${NONE}"
+    success "$done_msg"
 }
 
-success() {
-    echo -e "${GREEN}$1${NONE}"
-}
+trap 'error "Installation interrupted."' INT TERM
+
+INSTALL_DIR="$HOME/.script"
+TARGET_SCRIPT="$INSTALL_DIR/script.sh"
+SOURCE_SCRIPT="$(realpath ./script.sh)"
+
+[ -f "$SOURCE_SCRIPT" ] || error "Could not find ./script.sh in current directory."
 
 timer "Installing the script now..."
+mkdir -p "$INSTALL_DIR"
+cp "$SOURCE_SCRIPT" "$TARGET_SCRIPT"
 
-mkdir -p ~/.script/
-cp ./script.sh ~/.script/script.sh
+chmod u+x "$TARGET_SCRIPT"
+sed -i 's/\r$//' "$TARGET_SCRIPT"
 
-success "Script copied successfully!"
+success "Script copied and permissions set!"
 
-chmod u+x ~/.script/script.sh
+SHELL_RC=""
+case "$SHELL" in
+    */bash) SHELL_RC="$HOME/.bashrc" ;;
+    */zsh) SHELL_RC="$HOME/.zshrc" ;;
+    */fish) SHELL_RC="$HOME/.config/fish/config.fish" ;;
+    *)
+        SHELL_RC="$HOME/.bashrc"
+        warn "Unknown shell, defaulting to .bashrc"
+        ;;
+esac
 
-sed -i 's/\r$//' ~/.script/script.sh
+ALIAS_CMD="alias system='$TARGET_SCRIPT'"
 
-success "Executable permissions assigned to script!"
+if ! grep -Fxq "$ALIAS_CMD" "$SHELL_RC" 2>/dev/null; then
+    echo -e "\n$ALIAS_CMD" >>"$SHELL_RC"
+    success "Alias 'system' added to $SHELL_RC"
+else
+    warn "Alias 'system' already exists in $SHELL_RC"
+fi
 
-echo >>~/.bashrc
-echo "alias system='~/.script/script.sh'" >>~/.bashrc
-source ~/.bashrc
+if [ -n "$SHELL_RC" ] && [ -f "$SHELL_RC" ]; then
+    source "$SHELL_RC" || true
+fi
 
-success "Script successfully configured!"
+success "Installation complete! 🎉"
+echo -e "Run '${CYAN}system${NONE}' to launch your script."

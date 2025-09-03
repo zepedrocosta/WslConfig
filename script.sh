@@ -105,7 +105,7 @@ case $1 in
             5 "Gcc" off
             6 "Makefile" off
             7 "uv (multiple versions of python)" off
-            8 "Mysql" off
+            8 "MySQL" off
             9 "PostgresSQL" off
             10 "SQLite" off
             11 "Apache Cassandra" off
@@ -113,6 +113,7 @@ case $1 in
             13 "Redis" off
             14 "Neo4j" off
             15 "TeX Live" off
+            16 "GitHub CLI" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -141,20 +142,61 @@ case $1 in
                     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
-                5)
+                # Gcc
+				5)
                     update && timer "$CONT" "$INST Gcc"
                     sudo apt install gcc -y
                     success "Gcc installed successfully!"
                     ;;
-                6)
+                # Make
+				6)
                     update && timer "$CONT" "$INST Make"
                     sudo apt install make
                     success "Make installed successfully!"
                     ;;
+                # uv (https://github.com/astral-sh/uv)
                 7)
-                    # uv (https://github.com/astral-sh/uv)
                     update && timer "$CONT" "$INST uv"
+                    if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
+                        echo "uv installation failed!"
+                        exit 1
+                    fi
+                    uv self update
                     success "uv installed successfully!"
+                    cmd=(dialog --radiolist "Do you want to add the aliases? (Check uv_cheat_sheet.md)" 22 76 16)
+                    options=(
+                        1 "Yes" off
+                        2 "No" off
+                    )
+                    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+                    for choice in $choices; do
+                        case "${choice}" in
+                            1)
+                                SHELL_RC="$HOME/.bashrc"
+                                [ -n "$ZSH_VERSION" ] && SHELL_RC="$HOME/.zshrc"
+
+                                # Only add aliases if not already present
+                                if ! grep -q "alias uvp=" "$SHELL_RC"; then
+                                    {
+                                        echo 'alias uvp="uv run python"   # run Python directly'
+                                        echo 'alias uvr="uv run"         # run a command in venv'
+                                        echo 'alias uva="uv add"         # add dependency'
+                                        echo 'alias uvrm="uv remove"     # remove dependency'
+                                        echo 'alias uvs="uv sync"        # install/update deps'
+                                        echo 'alias uvpl="uv pip list"   # list packages'
+                                        echo 'alias uvl="uv lock"        # generate lockfile'
+                                        echo 'alias uvpy="uv python list"'
+                                    } >>"$SHELL_RC"
+
+                                    echo "Aliases added to $SHELL_RC"
+                                    echo "Run 'source $SHELL_RC' or restart your shell to use them."
+                                else
+                                    echo "Aliases already exist in $SHELL_RC, skipping."
+                                fi
+                                ;;
+                            2) ;;
+                        esac
+                    done
                     ;;
                 8)
                     update && timer "$CONT" "$INST MySQL"
@@ -210,6 +252,12 @@ case $1 in
                     sudo apt install texlive
                     success "TeX Live installed successfully!"
                     info "Run 'system latex-deps' to install LaTeX dependencies"
+                    ;;
+                # GitHub CLI
+                16)
+                    update && timer "$CONT" "$INST GitHub CLI"
+                    sudo apt install gh -y
+                    success "GitHub CLI installed successfully!"
                     ;;
             esac
         done

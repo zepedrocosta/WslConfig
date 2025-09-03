@@ -273,6 +273,7 @@ case $1 in
             1 "Install latest stable npm with nvm" off
             2 "Configure MySQL for WSL" off
             3 "Configure PostgresSQL for WSL" off
+			4 "Configure MariaDB for WSL" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         for choice in $choices; do
@@ -293,6 +294,12 @@ case $1 in
                     sudo passwd postgres
                     success "PostgresSQL configured successfully!"
                     ;;
+				4)
+					clear && timer "$CONT" "$INST MariaDB"
+					sudo /etc/init.d/mysql start
+					sudo mysql_secure_installation && sudo mariadb
+					success "MariaDB configured successfully!"
+					;;
             esac
         done
         success "Configuration finished successfully!"

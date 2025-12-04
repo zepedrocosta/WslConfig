@@ -143,13 +143,13 @@ case $1 in
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
                 # Gcc
-				5)
+                5)
                     update && timer "$CONT" "$INST Gcc"
                     sudo apt install gcc -y
                     success "Gcc installed successfully!"
                     ;;
                 # Make
-				6)
+                6)
                     update && timer "$CONT" "$INST Make"
                     sudo apt install make
                     success "Make installed successfully!"
@@ -273,7 +273,7 @@ case $1 in
             1 "Install latest stable npm with nvm" off
             2 "Configure MySQL for WSL" off
             3 "Configure PostgresSQL for WSL" off
-			4 "Configure MariaDB for WSL" off
+            4 "Configure MariaDB for WSL" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         for choice in $choices; do
@@ -294,16 +294,17 @@ case $1 in
                     sudo passwd postgres
                     success "PostgresSQL configured successfully!"
                     ;;
-				4)
-					clear && timer "$CONT" "$INST MariaDB"
-					sudo /etc/init.d/mysql start
-					sudo mysql_secure_installation && sudo mariadb
-					success "MariaDB configured successfully!"
-					;;
+                4)
+                    clear && timer "$CONT" "$INST MariaDB"
+                    sudo /etc/init.d/mysql start
+                    sudo mysql_secure_installation && sudo mariadb
+                    success "MariaDB configured successfully!"
+                    ;;
             esac
         done
         success "Configuration finished successfully!"
         ;;
+    # Start services
     start)
         run "mysql-server" "MySQL" "${NOP}" "${RUN}" "sudo /etc/init.d/mysql start"
         run "postgresql" "PostgresSQL" "${NOP}" "${RUN}" "sudo service postgresql start"
@@ -312,6 +313,7 @@ case $1 in
         run "redis-server" "Redis" "${NOP}" "${RUN}" "sudo service redis-server start"
         run "neo4j-enterprise" "Neo4j" "${NOP}" "${RUN}" "sudo service neo4j start"
         ;;
+    # Stop services
     stop)
         run "mysql-server" "MySQL" "${NOP}" "${STOP}" "sudo /etc/init.d/mysql stop"
         run "postgresql" "PostgresSQL" "${NOP}" "${STOP}" "sudo service postgresql stop"
@@ -320,6 +322,7 @@ case $1 in
         run "redis-server" "Redis" "${NOP}" "${STOP}" "sudo service redis-server stop"
         run "neo4j-enterprise" "Neo4j" "${NOP}" "${STOP}" "sudo service neo4j stop"
         ;;
+    # React dependencies
     react-deps)
         npm i react-router
         npm i react-router-dom
@@ -330,6 +333,7 @@ case $1 in
         npm i react-icons --save
         npm i recharts
         ;;
+    # LaTeX dependencies
     # https://tex.stackexchange.com/questions/245982/differences-between-texlive-packages-in-linux
     latex-deps)
         update

@@ -4,6 +4,19 @@
 
 This tutorial will show you how to setup WSL2 in windows as well as how to install some tools like database management systems, programming languages, dependency management and building tools among other development tools. Running these scripts give you a choice of what to install as well as give some indications on how to configure those who need configuring.
 
+## **0. WSL Config**
+
+Increase the amount of RAM, Swap and CPU cores in your WSL distro.
+
+Put this here: `%UserProfile%\.wslconfig` (Windows user)
+
+```
+[wsl2]
+memory=20GB
+processors=12
+swap=50GB
+swapfile=C:\\Users\\josep\\wsl-swap.vhdx
+```
 ## **1. Initial Ubuntu setup**
 
 I strongly advise that the first thing you do after installing your wsl distro is running a chown command over your root. You can do this by changing directory until you are in the `home` directory (if you just booted your distro, run `cd ..`) and you should see the prompt end in `/home$`, and then run:

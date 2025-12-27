@@ -102,7 +102,7 @@ case $1 in
             2 "Java 17 Sources" off
             3 "Maven" off
             4 "Node Version Manager (nvm)" off
-            5 "Gcc" off
+            5 "GCC & GDB" off
             6 "Makefile" off
             7 "uv (Python package and project manager)" off
             8 "TeX Live" off
@@ -135,11 +135,11 @@ case $1 in
                     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
-                # Gcc
+                # GCC & GDB
                 5)
-                    update && timer "$CONT" "$INST Gcc"
-                    sudo apt install gcc -y
-                    success "Gcc installed successfully!"
+                    update && timer "$CONT" "$INST GCC & GDB"
+                    sudo apt install gcc gdb -y
+                    success "GCC & GDB installed successfully!"
                     ;;
                 # Make
                 6)

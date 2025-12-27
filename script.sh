@@ -104,16 +104,9 @@ case $1 in
             4 "Node Version Manager (nvm)" off
             5 "Gcc" off
             6 "Makefile" off
-            7 "uv (multiple versions of python)" off
-            8 "MySQL" off
-            9 "PostgresSQL" off
-            10 "SQLite" off
-            11 "Apache Cassandra" off
-            12 "MongoDB" off
-            13 "Redis" off
-            14 "Neo4j" off
-            15 "TeX Live" off
-            16 "GitHub CLI" off
+            7 "uv (Python package and project manager)" off
+            8 "TeX Live" off
+            9 "GitHub CLI" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -198,22 +191,59 @@ case $1 in
                         esac
                     done
                     ;;
+                # TeX Live
                 8)
+                    update && timer "$CONT" "$INST TeX Live"
+                    sudo apt install texlive
+                    success "TeX Live installed successfully!"
+                    info "Run 'system latex-deps' to install LaTeX dependencies"
+                    ;;
+                # GitHub CLI
+                9)
+                    update && timer "$CONT" "$INST GitHub CLI"
+                    sudo apt install gh -y
+                    success "GitHub CLI installed successfully!"
+                    ;;
+            esac
+        done
+        success "Installation finished successfully!"
+        ;;
+    install-services)
+        update
+        if missing "dialog"; then
+            info "Installing Dialog" && sudo -i apt install dialog >/dev/null 2>&1
+        fi
+        cmd=(dialog --separate-output --checklist "Please Select Services you want to install:" 22 76 16)
+        options=(
+            1 "MySQL" off
+            2 "PostgresSQL" off
+            3 "SQLite" off
+            4 "Apache Cassandra" off
+            5 "MongoDB" off
+            6 "Redis" off
+            7 "Neo4j" off
+            8 "Syncthing" off
+        )
+        choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+        clear
+        for choice in $choices; do
+            case "${choice}" in
+                1)
                     update && timer "$CONT" "$INST MySQL"
                     sudo apt install mysql-server -y
                     warn "$WARN" && success "MySQL installed successfully!"
                     ;;
-                9)
+                2)
                     update && timer "$CONT" "$INST PostgresSQL"
                     sudo apt install postgresql postgresql-contrib -y
                     warn "$WARN" && success "PostgresSQL installed successfully!"
                     ;;
-                10)
+                3)
                     update && timer "$CONT" "$INST SQLite"
                     sudo apt install sqlite3
                     success "SQLite installed successfully!"
                     ;;
-                11)
+                4)
                     update && timer "$CONT" "$INST Apache Cassandra"
                     sudo apt install openjdk-8-jre
                     sudo apt install apt-transport-https gnupg2 -y
@@ -224,7 +254,7 @@ case $1 in
                     echo 'JAVA_HOME=usr/lib/jvm/java-8-openjdk-amd64' >>~/usr/share/cassandra/cassandra.in.sh
                     success "Apache Cassandra installed successfully!"
                     ;;
-                12)
+                5)
                     update && timer "$CONT" "$INST MongoDB"
                     wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
                     echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
@@ -233,12 +263,12 @@ case $1 in
                     sudo chmod +x /etc/init.d/mongodb
                     success "MongoDB installed successfully!"
                     ;;
-                13)
+                6)
                     update && timer "$CONT" "$INST Redis"
                     sudo apt install redis-server -y
                     success "Redis installed successfully!"
                     ;;
-                14)
+                7)
                     update && timer "$CONT" "$INST Neo4j"
                     wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
                     echo 'deb https://debian.neo4j.com stable latest' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
@@ -246,22 +276,35 @@ case $1 in
                     sudo apt-get install neo4j-enterprise -y
                     success "Neo4j installed successfully!"
                     ;;
-                # TeX Live
-                15)
-                    update && timer "$CONT" "$INST TeX Live"
-                    sudo apt install texlive
-                    success "TeX Live installed successfully!"
-                    info "Run 'system latex-deps' to install LaTeX dependencies"
-                    ;;
-                # GitHub CLI
-                16)
-                    update && timer "$CONT" "$INST GitHub CLI"
-                    sudo apt install gh -y
-                    success "GitHub CLI installed successfully!"
+                8)
+                    update && timer "$CONT" "$INST Syncthing"
+                    sudo apt install syncthing -y
+                    success "Syncthing installed successfully!"
+                    cmd=(dialog --radiolist "Do you want to enable Syncthing to start automatically?" 22 76 16)
+                    options=(
+                        1 "Yes" off
+                        2 "No" off
+                    )
+                    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+                    for choice in $choices; do
+                        case "${choice}" in
+                            1)
+                                syncthing -generate >/dev/null 2>&1
+                                systemctl --user enable syncthing
+                                systemctl --user start syncthing
+                                success "Syncthing enabled and started!"
+                                ;;
+                            2)
+                                info "Syncthing not enabled. Run 'systemctl --user enable syncthing' to enable it later."
+                                ;;
+                        esac
+                    done
+					info "Access GUI at http://localhost:8384"
+                    warn "Check syncthing_setup.md for configuration details"
                     ;;
             esac
         done
-        success "Installation finished successfully!"
+        success "Services installation finished successfully!"
         ;;
     config)
         update
@@ -312,6 +355,7 @@ case $1 in
         run "cassandra" "Apache Cassandra" "${NOP}" "${RUN}" "sudo service cassandra start"
         run "redis-server" "Redis" "${NOP}" "${RUN}" "sudo service redis-server start"
         run "neo4j-enterprise" "Neo4j" "${NOP}" "${RUN}" "sudo service neo4j start"
+        run "syncthing" "Syncthing" "${NOP}" "${RUN}" "systemctl --user start syncthing"
         ;;
     # Stop services
     stop)
@@ -321,6 +365,7 @@ case $1 in
         run "cassandra" "Apache Cassandra" "${NOP}" "${STOP}" "sudo service cassandra stop"
         run "redis-server" "Redis" "${NOP}" "${STOP}" "sudo service redis-server stop"
         run "neo4j-enterprise" "Neo4j" "${NOP}" "${STOP}" "sudo service neo4j stop"
+        run "syncthing" "Syncthing" "${NOP}" "${STOP}" "systemctl --user stop syncthing"
         ;;
     # React dependencies
     react-deps)

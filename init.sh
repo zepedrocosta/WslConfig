@@ -38,18 +38,21 @@ trap 'error "Installation interrupted."' INT TERM
 
 INSTALL_DIR="$HOME/.script"
 TARGET_SCRIPT="$INSTALL_DIR/script.sh"
-SOURCE_SCRIPT="$(realpath ./script.sh)"
+SOURCE_DIR="$(pwd)"
+SOURCE_SCRIPT="$SOURCE_DIR/script.sh"
 
 [ -f "$SOURCE_SCRIPT" ] || error "Could not find ./script.sh in current directory."
 
 timer "Installing the script now..."
 mkdir -p "$INSTALL_DIR"
-cp "$SOURCE_SCRIPT" "$TARGET_SCRIPT"
+
+# Copy the entire directory contents
+cp -r "$SOURCE_DIR/"* "$INSTALL_DIR/"
 
 chmod u+x "$TARGET_SCRIPT"
 sed -i 's/\r$//' "$TARGET_SCRIPT"
 
-success "Script copied and permissions set!"
+success "Script and related files copied successfully!"
 
 SHELL_RC=""
 case "$SHELL" in

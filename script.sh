@@ -102,11 +102,12 @@ case $1 in
             2 "Java 17 Sources" off
             3 "Maven" off
             4 "Node Version Manager (nvm)" off
-            5 "GCC & GDB" off
-            6 "Makefile" off
-            7 "uv (Python package and project manager)" off
-            8 "TeX Live" off
-            9 "GitHub CLI" off
+            5 "pnpm" off
+            6 "GCC & GDB" off
+            7 "Makefile" off
+            8 "uv (Python package and project manager)" off
+            9 "TeX Live" off
+            10 "shfmt (shell script formatter)" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -135,20 +136,27 @@ case $1 in
                     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
-                # GCC & GDB
+                # pnpm
                 5)
+                    update && timer "$CONT" "$INST pnpm"
+                    curl -fsSL https://get.pnpm.io/install.sh | sh -
+                    success "pnpm installed successfully!"
+                    info "You may need to restart your terminal or source your shell config to use pnpm"
+                    ;;
+                # GCC & GDB
+                6)
                     update && timer "$CONT" "$INST GCC & GDB"
                     sudo apt install gcc gdb -y
                     success "GCC & GDB installed successfully!"
                     ;;
                 # Make
-                6)
+                7)
                     update && timer "$CONT" "$INST Make"
                     sudo apt install make
                     success "Make installed successfully!"
                     ;;
-                # uv (https://github.com/astral-sh/uv)
-                7)
+                # uv https://github.com/astral-sh/uv
+                8)
                     update && timer "$CONT" "$INST uv"
                     if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
                         echo "uv installation failed!"
@@ -192,18 +200,30 @@ case $1 in
                     done
                     ;;
                 # TeX Live
-                8)
+                9)
                     update && timer "$CONT" "$INST TeX Live"
                     sudo apt install texlive
                     success "TeX Live installed successfully!"
                     info "Run 'system latex-deps' to install LaTeX dependencies"
                     ;;
-                # GitHub CLI
-                9)
-                    update && timer "$CONT" "$INST GitHub CLI"
-                    sudo apt install gh -y
-                    success "GitHub CLI installed successfully!"
+                # shfmt https://github.com/mvdan/sh
+                10)
+                    update && timer "$CONT" "$INST shfmt"
+                    SHFMT_VERSION=$(curl -s https://api.github.com/repos/mvdan/sh/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+                    ARCH=$(dpkg --print-architecture)
+                    if [ "$ARCH" = "amd64" ]; then
+                        wget -q https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_amd64 -O /tmp/shfmt
+                    elif [ "$ARCH" = "arm64" ]; then
+                        wget -q https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_linux_arm64 -O /tmp/shfmt
+                    else
+                        error "Unsupported architecture: $ARCH"
+                        exit 1
+                    fi
+                    sudo mv /tmp/shfmt /usr/local/bin/shfmt
+                    sudo chmod +x /usr/local/bin/shfmt
+                    success "shfmt installed successfully!"
                     ;;
+
             esac
         done
         success "Installation finished successfully!"
@@ -223,6 +243,7 @@ case $1 in
             6 "Redis" off
             7 "Neo4j" off
             8 "Syncthing" off
+            9 "GitHub CLI" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -302,6 +323,12 @@ case $1 in
 					info "Access GUI at http://localhost:8384"
                     warn "Check syncthing_setup.md for configuration details"
                     ;;
+                # GitHub CLI
+                9)
+                    update && timer "$CONT" "$INST GitHub CLI"
+                    sudo apt install gh -y
+                    success "GitHub CLI installed successfully!"
+                    ;;
             esac
         done
         success "Services installation finished successfully!"
@@ -366,17 +393,6 @@ case $1 in
         run "redis-server" "Redis" "${NOP}" "${STOP}" "sudo service redis-server stop"
         run "neo4j-enterprise" "Neo4j" "${NOP}" "${STOP}" "sudo service neo4j stop"
         run "syncthing" "Syncthing" "${NOP}" "${STOP}" "systemctl --user stop syncthing"
-        ;;
-    # React dependencies
-    react-deps)
-        npm i react-router
-        npm i react-router-dom
-        npm i react-redux
-        npm i @types/react-redux
-        npm i @reduxjs/toolkit
-        npm i axios
-        npm i react-icons --save
-        npm i recharts
         ;;
     # LaTeX dependencies
     # https://tex.stackexchange.com/questions/245982/differences-between-texlive-packages-in-linux

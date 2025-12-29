@@ -38,8 +38,8 @@ me=$USER
 
 update() {
     info "Updating Ubuntu..."
-    sudo -i apt-get update >/dev/null 2>&1
-    sudo apt-get upgrade -y >/dev/null 2>&1
+    sudo -i apt-get update
+    sudo apt-get upgrade -y
     success "Ubuntu Updated Successfully!" &
     sleep 2
 }
@@ -344,6 +344,7 @@ case $1 in
             2 "Configure MySQL for WSL" off
             3 "Configure PostgresSQL for WSL" off
             4 "Configure MariaDB for WSL" off
+            5 "Setup Syncthing Auto-Export on WSL Startup" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         for choice in $choices; do
@@ -369,6 +370,45 @@ case $1 in
                     sudo /etc/init.d/mysql start
                     sudo mysql_secure_installation && sudo mariadb
                     success "MariaDB configured successfully!"
+                    ;;
+                5)
+                    clear
+                    info "Setting up Syncthing Auto-Export..."
+                    
+                    # Check if syncthing is installed
+                    if ! command -v syncthing >/dev/null 2>&1; then
+                        error "Syncthing is not installed. Please install it first."
+                        exit 1
+                    fi
+                    
+                    # Get the directory where this script is located
+                    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+                    EXPORT_SCRIPT="$SCRIPT_DIR/syncthing_backup/script.sh"
+                    
+                    # Check if source script exists
+                    if [ ! -f "$EXPORT_SCRIPT" ]; then
+                        error "Syncthing backup script not found at: $EXPORT_SCRIPT"
+                        exit 1
+                    fi
+                    
+                    # Make it executable
+                    chmod +x "$EXPORT_SCRIPT"
+                    
+                    # Add to .bashrc if not already present
+                    BASHRC_LINE="$EXPORT_SCRIPT >/dev/null 2>&1 &"
+                    if ! grep -q "syncthing_backup/script.sh" "$HOME/.bashrc"; then
+                        echo "" >> "$HOME/.bashrc"
+                        echo "# Syncthing auto-export on startup" >> "$HOME/.bashrc"
+                        echo "$BASHRC_LINE" >> "$HOME/.bashrc"
+                        success "Syncthing auto-export setup completed!"
+                        info "Backup script: $EXPORT_SCRIPT"
+                        info "Backups location: $HOME/syncthing-backups"
+                        info "The script will run automatically on WSL startup"
+                        warn "Run 'source ~/.bashrc' or restart WSL to activate"
+                    else
+                        warn "Syncthing auto-export already configured in .bashrc"
+                        info "Using script at: $EXPORT_SCRIPT"
+                    fi
                     ;;
             esac
         done

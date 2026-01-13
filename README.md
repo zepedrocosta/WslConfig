@@ -314,9 +314,3 @@ Some services need additional configuration after installation. The script will 
 > "This needs further configuration. Check the tutorial README."
 
 Refer to the [Configuring Software](#configuring-software) section for details.
-
----
-
-**Authors:**
-- [@zepedrocosta](https://github.com/zepedrocosta)
-- [@GoncaloAC](https://github.com/GoncaloAC)

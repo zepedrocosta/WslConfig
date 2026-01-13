@@ -160,7 +160,7 @@ system install
 - pnpm
 - GCC & GDB (C/C++ development)
 - Make
-- uv (Python package manager - see [UV Cheat Sheet](uv_cheat_sheet.md))
+- uv (Python package manager - see [uv Cheat Sheet](uv_cheat_sheet.md))
 - TeX Live
 - shfmt (shell script formatter)
 
@@ -251,7 +251,7 @@ The main alias created by the installation script:
 system    # Main script alias (points to ~/.script/script.sh)
 ```
 
-### UV Aliases (Optional)
+### uv Aliases (Optional)
 
 If you installed `uv` and chose to add aliases, these are available:
 
@@ -266,13 +266,13 @@ uvl       # uv lock - Generate lockfile
 uvpy      # uv python list - List Python versions
 ```
 
-For detailed UV usage, see the [UV Cheat Sheet](uv_cheat_sheet.md).
+For detailed uv usage, see the [uv Cheat Sheet](uv_cheat_sheet.md).
 
 ## Additional Documentation
 
 This repository includes several guides for specific topics:
 
-- **[UV Cheat Sheet](uv_cheat_sheet.md)** - Quick reference guide for using the `uv` Python package manager, including installation, project management, virtual environments, and useful aliases.
+- **[uv Cheat Sheet](uv_cheat_sheet.md)** - Quick reference guide for using the `uv` Python package manager, including installation, project management, virtual environments, and useful aliases.
 
 - **[Syncthing Setup](syncthing_setup.md)** - Comprehensive guide for setting up Syncthing to synchronize code projects from WSL to Windows. Includes configuration for optimal performance with many small files.
 

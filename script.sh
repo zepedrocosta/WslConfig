@@ -100,14 +100,16 @@ case $1 in
         options=(
             1 "Java 17" off
             2 "Java 17 Sources" off
-            3 "Maven" off
-            4 "Node Version Manager (nvm)" off
-            5 "pnpm" off
-            6 "GCC & GDB" off
-            7 "Makefile" off
-            8 "uv (Python package and project manager)" off
-            9 "TeX Live" off
-            10 "shfmt (shell script formatter)" off
+            3 "Java 21" off
+            4 "Java 21 Sources" off
+            5 "Maven" off
+            6 "Node Version Manager (nvm)" off
+            7 "pnpm" off
+            8 "GCC & GDB" off
+            9 "Makefile" off
+            10 "uv (Python package and project manager)" off
+            11 "TeX Live" off
+            12 "shfmt (shell script formatter)" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -126,6 +128,18 @@ case $1 in
                     success "Java 17 sources installed successfully!"
                     ;;
                 3)
+                    update && timer "$CONT" "$INST Java 21"
+                    sudo apt-get install openjdk-21-jdk -y
+                    echo >>~/.bashrc
+                    echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64' >>~/.bashrc
+                    success "Java 21 installed successfully!"
+                    ;;
+                4)
+                    update && timer "$CONT" "$INST Java 21 sources"
+                    sudo apt-get install openjdk-21-source -y
+                    success "Java 21 sources installed successfully!"
+                    ;;
+                5)
                     update && timer "$CONT" "$INST Maven"
                     sudo apt install maven
                     success "Maven installed successfully!"
@@ -137,26 +151,26 @@ case $1 in
                     warn "$WARN" && success "NVM installed successfully!"
                     ;;
                 # pnpm
-                5)
+                7)
                     update && timer "$CONT" "$INST pnpm"
                     curl -fsSL https://get.pnpm.io/install.sh | sh -
                     success "pnpm installed successfully!"
                     info "You may need to restart your terminal or source your shell config to use pnpm"
                     ;;
                 # GCC & GDB
-                6)
+                8)
                     update && timer "$CONT" "$INST GCC & GDB"
                     sudo apt install gcc gdb -y
                     success "GCC & GDB installed successfully!"
                     ;;
                 # Make
-                7)
+                9)
                     update && timer "$CONT" "$INST Make"
                     sudo apt install make
                     success "Make installed successfully!"
                     ;;
                 # uv https://github.com/astral-sh/uv
-                8)
+                10)
                     update && timer "$CONT" "$INST uv"
                     if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
                         echo "uv installation failed!"
@@ -200,14 +214,14 @@ case $1 in
                     done
                     ;;
                 # TeX Live
-                9)
+                11)
                     update && timer "$CONT" "$INST TeX Live"
                     sudo apt install texlive
                     success "TeX Live installed successfully!"
                     info "Run 'system latex-deps' to install LaTeX dependencies"
                     ;;
                 # shfmt https://github.com/mvdan/sh
-                10)
+                12)
                     update && timer "$CONT" "$INST shfmt"
                     SHFMT_VERSION=$(curl -s https://api.github.com/repos/mvdan/sh/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
                     ARCH=$(dpkg --print-architecture)
@@ -468,6 +482,88 @@ case $1 in
         esac
         success "LaTeX dependencies installed successfully!"
         ;;
+	java-switcher)
+        if missing "dialog"; then
+            info "Installing Dialog" && sudo -i apt install dialog >/dev/null 2>&1
+        fi
+        
+        info "Detecting installed Java versions..."
+        
+        # Find all Java installations
+        java_installations=()
+        index=1
+        
+        # Search common Java installation directories
+        for java_home in /usr/lib/jvm/java-*-openjdk-* /usr/lib/jvm/jdk-* /usr/lib/jvm/adoptopenjdk-* /opt/java/*; do
+            if [ -d "$java_home" ] && [ -f "$java_home/bin/java" ]; then
+                # Get Java version
+                version_output=$("$java_home/bin/java" -version 2>&1 | head -n 1)
+                
+                # Extract version number more reliably
+                if [[ $version_output =~ \"([0-9]+\.[0-9]+\.[0-9]+[^\"]*)\" ]] || [[ $version_output =~ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                    version="${BASH_REMATCH[1]}"
+                else
+                    version="unknown"
+                fi
+                
+                java_installations+=("$index" "$java_home (v$version)" "off")
+                ((index++))
+            fi
+        done
+        
+        # Check if any Java installations were found
+        if [ ${#java_installations[@]} -eq 0 ]; then
+            error "No Java installations found in common directories."
+            error "Searched in: /usr/lib/jvm/java-*, /usr/lib/jvm/jdk-*, /usr/lib/jvm/adoptopenjdk-*, /opt/java/*"
+            exit 1
+        fi
+        
+        # Create dialog
+        cmd=(dialog --radiolist "Select Java version to set as JAVA_HOME:" 22 76 16)
+        choice=$("${cmd[@]}" "${java_installations[@]}" 2>&1 >/dev/tty)
+        clear
+        
+        if [ -z "$choice" ]; then
+            warn "No selection made. JAVA_HOME unchanged."
+            exit 0
+        fi
+        
+        # Get the selected Java home path
+        selected_index=$((choice * 3 - 2))
+        selected_java_home=$(echo "${java_installations[$selected_index]}" | cut -d' ' -f1)
+        
+        # Verify the selection
+        if [ ! -d "$selected_java_home" ]; then
+            error "Selected Java home directory does not exist: $selected_java_home"
+            exit 1
+        fi
+        
+        info "Selected: $selected_java_home"
+        
+        # Remove old JAVA_HOME from .bashrc
+        if grep -q "export JAVA_HOME=" ~/.bashrc; then
+            info "Removing old JAVA_HOME from .bashrc..."
+            sed -i '/export JAVA_HOME=/d' ~/.bashrc
+        fi
+        
+        # Add new JAVA_HOME to .bashrc
+        echo "" >> ~/.bashrc
+        echo "# Java Home - Set on $(date '+%Y-%m-%d %H:%M:%S')" >> ~/.bashrc
+        echo "export JAVA_HOME=$selected_java_home" >> ~/.bashrc
+        echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc
+        
+        # Also export for current session
+        export JAVA_HOME="$selected_java_home"
+        export PATH="$JAVA_HOME/bin:$PATH"
+        
+        success "JAVA_HOME set to: $selected_java_home"
+        info "Current session updated. Run 'source ~/.bashrc' in other terminals or restart them."
+        
+        # Display current Java version
+        info "Current Java version:"
+        java -version
+        ;;
+
     *)
         echo "error"
         ;;

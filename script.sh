@@ -212,6 +212,23 @@ case $1 in
                             2) ;;
                         esac
                     done
+                    cmd=(dialog --radiolist "Do you want to install black (Python formatter)?" 22 76 16)
+                    options=(
+                        1 "Yes" off
+                        2 "No" off
+                    )
+                    choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+                    for choice in $choices; do
+                        case "${choice}" in
+                            1)
+                                uv tool install black
+                                uv tool update-shell
+                                success "Black installed successfully!"
+                                ;;
+                            2) ;;
+                        esac
+                    done
+
                     ;;
                 # TeX Live
                 11)

@@ -275,6 +275,7 @@ case $1 in
             7 "Neo4j" off
             8 "Syncthing" off
             9 "GitHub CLI" off
+            10 "Firefox" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -359,6 +360,13 @@ case $1 in
                     update && timer "$CONT" "$INST GitHub CLI"
                     sudo apt install gh -y
                     success "GitHub CLI installed successfully!"
+                    ;;
+                # Firefox
+                10)
+                    update && timer "$CONT" "$INST Firefox"
+                    sudo add-apt-repository ppa:mozillateam/ppa
+                    sudo apt install firefox
+                    success "Firefox installed successfully!"
                     ;;
             esac
         done

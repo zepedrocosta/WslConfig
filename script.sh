@@ -434,7 +434,7 @@ case $1 in
                     chmod +x "$EXPORT_SCRIPT"
                     
                     # Add to .bashrc if not already present
-                    BASHRC_LINE="($EXPORT_SCRIPT >/dev/null 2>&1 &)"
+                    BASHRC_LINE="$EXPORT_SCRIPT >/dev/null 2>&1 & disown"
                     if ! grep -q "syncthing_backup/script.sh" "$HOME/.bashrc"; then
                         echo "" >> "$HOME/.bashrc"
                         echo "# Syncthing auto-export on startup" >> "$HOME/.bashrc"

@@ -520,6 +520,8 @@ case $1 in
         
         # Search common Java installation directories
         for java_home in /usr/lib/jvm/java-*-openjdk-* /usr/lib/jvm/jdk-* /usr/lib/jvm/adoptopenjdk-* /opt/java/*; do
+            # Skip java-1.x.y style paths (legacy naming like java-1.17.0-openjdk-*)
+            [[ "$(basename "$java_home")" =~ ^java-1\. ]] && continue
             if [ -d "$java_home" ] && [ -f "$java_home/bin/java" ]; then
                 # Get Java version
                 version_output=$("$java_home/bin/java" -version 2>&1 | head -n 1)

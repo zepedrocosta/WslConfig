@@ -588,7 +588,21 @@ case $1 in
         info "Current Java version:"
         java -version
         ;;
-
+    clean-zone)
+        target_dir="${2:-.}"
+        if [ ! -d "$target_dir" ]; then
+            error "Directory not found: $target_dir"
+            exit 1
+        fi
+        info "Searching for Zone.Identifier files in '$target_dir'..."
+        count=$(find "$target_dir" -type f -name "*Zone.Identifier*" | wc -l)
+        if [ "$count" -eq 0 ]; then
+            info "No Zone.Identifier files found."
+        else
+            find "$target_dir" -type f -name "*Zone.Identifier*" -print -delete
+            success "Deleted $count Zone.Identifier file(s)."
+        fi
+        ;;
     *)
         echo "error"
         ;;

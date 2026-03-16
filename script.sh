@@ -276,6 +276,7 @@ case $1 in
             8 "Syncthing" off
             9 "GitHub CLI" off
             10 "Firefox" off
+            11 "Claude Code" off
         )
         choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
         clear
@@ -367,6 +368,13 @@ case $1 in
                     sudo add-apt-repository ppa:mozillateam/ppa
                     sudo apt install firefox
                     success "Firefox installed successfully!"
+                    ;;
+                # Claude Code
+                11)
+                    update && timer "$CONT" "$INST Claude Code"
+                    sudo apt-get install curl
+                    curl -fsSL https://claude.ai/install.sh | bash
+                    success "Claude Code installed successfully!"
                     ;;
             esac
         done

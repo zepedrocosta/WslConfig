@@ -20,7 +20,7 @@
     https://stackoverflow.com/questions/36433835/getting-cassandra-to-use-an-alternate-java-install
 '
 
-SCRIPT_VERSION="v1.0.1"
+SCRIPT_VERSION="v1.1.1"
 GITHUB_REPO="zepedrocosta/WslConfig"
 
 RED="\033[0;31m"
@@ -626,7 +626,9 @@ case $1 in
             success "You are running the latest version (${SCRIPT_VERSION})."
         else
             warn "A newer version is available: ${latest} (you have ${SCRIPT_VERSION})"
-            warn "Update at: https://github.com/${GITHUB_REPO}/releases/latest"
+            info "To update, run the following commands from the WslConfig directory:"
+            echo -e "  git fetch && git pull"
+            echo -e "  ./init.sh"
         fi
         ;;
     *)

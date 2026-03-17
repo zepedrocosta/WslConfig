@@ -20,6 +20,9 @@
     https://stackoverflow.com/questions/36433835/getting-cassandra-to-use-an-alternate-java-install
 '
 
+SCRIPT_VERSION="v1.0.1"
+GITHUB_REPO="zepedrocosta/WslConfig"
+
 RED="\033[0;31m"
 YELLOW="\033[1;33m"
 GREEN="\033[0;32m"
@@ -611,6 +614,19 @@ case $1 in
         else
             find "$target_dir" -type f -name "*Zone.Identifier*" -print -delete
             success "Deleted $count Zone.Identifier file(s)."
+        fi
+        ;;
+    script-version)
+        info "WSL Config Script - Version: ${SCRIPT_VERSION}"
+        info "Checking for updates..."
+        latest=$(curl -sf "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ -z "$latest" ]; then
+            warn "Could not retrieve latest release info. Check your internet connection or visit: https://github.com/${GITHUB_REPO}/releases"
+        elif [ "$latest" = "$SCRIPT_VERSION" ]; then
+            success "You are running the latest version (${SCRIPT_VERSION})."
+        else
+            warn "A newer version is available: ${latest} (you have ${SCRIPT_VERSION})"
+            warn "Update at: https://github.com/${GITHUB_REPO}/releases/latest"
         fi
         ;;
     *)

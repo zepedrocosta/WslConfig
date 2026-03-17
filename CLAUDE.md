@@ -28,6 +28,7 @@ system stop              # Stop all installed services
 system latex-deps        # Install LaTeX packages (base/extra/full)
 system java-switcher     # Interactive Java version switcher (updates JAVA_HOME in .bashrc)
 system clean-zone        # Remove Zone.Identifier files recursively in a given directory
+system script-version    # Print current version and check GitHub for newer releases
 ```
 
 ## Architecture

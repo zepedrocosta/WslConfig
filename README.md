@@ -4,24 +4,37 @@ A comprehensive automation script for setting up WSL2 Ubuntu with development to
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [WSL Configuration](#wsl-configuration)
-- [Initial Ubuntu Setup](#initial-ubuntu-setup)
-- [Installation](#installation)
-- [Available Commands](#available-commands)
-  - [Installing Software](#installing-software)
-  - [Installing Services](#installing-services)
-  - [Configuring Software](#configuring-software)
-  - [Managing Services](#managing-services)
-  - [LaTeX Dependencies](#latex-dependencies)
-- [Available Aliases](#available-aliases)
-- [Additional Documentation](#additional-documentation)
-- [Important Notes](#important-notes)
+- [WSL2 Ubuntu Setup \& Configuration Tool](#wsl2-ubuntu-setup--configuration-tool)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Quick Start](#quick-start)
+  - [WSL Configuration](#wsl-configuration)
+  - [Initial Ubuntu Setup](#initial-ubuntu-setup)
+  - [Installation](#installation)
+    - [Automated Installation (Recommended)](#automated-installation-recommended)
+    - [Manual Installation (Alternative)](#manual-installation-alternative)
+    - [Reboot WSL](#reboot-wsl)
+  - [Available Commands](#available-commands)
+    - [Installing Software](#installing-software)
+    - [Installing Services](#installing-services)
+    - [Configuring Software](#configuring-software)
+    - [Managing Services](#managing-services)
+    - [LaTeX Dependencies](#latex-dependencies)
+    - [Script Version](#script-version)
+  - [Available Aliases](#available-aliases)
+    - [System Alias](#system-alias)
+    - [uv Aliases (Optional)](#uv-aliases-optional)
+  - [Additional Documentation](#additional-documentation)
+  - [Important Notes](#important-notes)
+    - [WSL Reboot Procedure](#wsl-reboot-procedure)
+    - [Dialog UI Issues](#dialog-ui-issues)
+    - [Software Requiring Reboot](#software-requiring-reboot)
+    - [Service Configuration](#service-configuration)
 
 ## Overview
 
 This repository provides automation scripts to:
+
 - Install development tools (Java, Node.js, Python, C/C++, etc.)
 - Set up database systems (MySQL, PostgreSQL, MongoDB, Redis, etc.)
 - Configure services (Syncthing, GitHub CLI)
@@ -86,6 +99,7 @@ chmod u+x init.sh
 ```
 
 This script will:
+
 - Copy scripts to `~/.script/`
 - Make them executable
 - Fix line endings
@@ -97,27 +111,32 @@ This script will:
 If you prefer manual installation:
 
 1. Copy the script files to a permanent location (e.g., `~/.script/`):
+
    ```bash
    mkdir -p ~/.script
    cp script.sh ~/.script/
    ```
 
 2. Make the script executable:
+
    ```bash
    chmod u+x ~/.script/script.sh
    ```
 
 3. Fix line endings (if needed):
+
    ```bash
    sed -i 's/\r$//' ~/.script/script.sh
    ```
 
 4. Add alias to your shell configuration (`~/.bashrc`, `~/.zshrc`, etc.):
+
    ```bash
    echo "alias system='$HOME/.script/script.sh'" >> ~/.bashrc
    ```
 
 5. Reload your shell configuration:
+
    ```bash
    source ~/.bashrc
    ```
@@ -153,6 +172,7 @@ system install
 ```
 
 **Available Software:**
+
 - Java 17 (JDK)
 - Java 17 Sources
 - Maven
@@ -175,10 +195,12 @@ system install-services
 ```
 
 **Available Services:**
+
 - **Databases:** MySQL, PostgreSQL, SQLite, Apache Cassandra, MongoDB, Redis, Neo4j
 - **Tools:** Syncthing (file synchronization), GitHub CLI
 
 **Related Documentation:**
+
 - [Syncthing Setup Guide](syncthing_setup.md) - Complete setup for WSL→Windows synchronization
 - [Syncthing Backup](syncthing_backup/README.md) - Automatic backup configuration
 
@@ -191,6 +213,7 @@ system config
 ```
 
 **Configuration Options:**
+
 1. **NVM** - Install the latest stable npm version
 2. **MySQL** - Run secure installation and set up root password
 3. **PostgreSQL** - Set up postgres user password
@@ -199,6 +222,7 @@ system config
 
 **MySQL Configuration Guide:**
 After selecting MySQL configuration, you'll be guided through:
+
 - VALIDATE PASSWORD setup (recommended: **no** for local development)
 - Root password creation
 - Remove Anonymous Users (recommended: **yes**)
@@ -210,16 +234,19 @@ After selecting MySQL configuration, you'll be guided through:
 ### Managing Services
 
 **Start all installed services:**
+
 ```bash
 system start
 ```
 
 **Stop all running services:**
+
 ```bash
 system stop
 ```
 
 These commands will start/stop all installed database services:
+
 - MySQL
 - PostgreSQL
 - MongoDB
@@ -237,9 +264,20 @@ system latex-deps
 ```
 
 **Available Options:**
+
 - Base version (~216MB)
 - Extra version (~452MB)
 - Full version (~5358MB)
+
+### Script Version
+
+Check the current version and whether an update is available:
+
+```bash
+system script-version
+```
+
+This command prints the installed version and queries the GitHub API to compare it against the latest release. If a newer version exists, a warning with the update URL is displayed.
 
 ## Available Aliases
 
@@ -292,6 +330,7 @@ Some installations require a WSL reboot. **Always follow this procedure:**
 2. Open Windows PowerShell or Command Prompt
 
 3. Terminate the distro:
+
    ```powershell
    wsl -t <distro-name>
    ```
@@ -305,6 +344,7 @@ The interactive selection dialogs may have display issues in full-screen mode. I
 ### Software Requiring Reboot
 
 These packages require a WSL reboot after installation:
+
 - Maven
 - Node Version Manager (nvm/npm)
 
